@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const ErrNotFound = require('./errors/constants');
+const { ErrNotFound } = require('./errors/constants');
 
 const { PORT = 3000 } = process.env;
 
@@ -22,11 +22,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
-app.use('*', (req, res) => {
+app.all('*', (req, res) => {
   res.status(ErrNotFound).send({ message: 'Запрос не обрабатывается' });
 });
 
