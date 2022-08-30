@@ -5,5 +5,5 @@ const ErrDefault = 500;
 module.exports = {
   ErrBadRequest,
   ErrNotFound,
-  ErrDefault
+  ErrDefault,
 };
