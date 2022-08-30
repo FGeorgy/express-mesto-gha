@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
-app.all('*', (req, res) => {
+app.use('*', (req, res) => {
   res.status(ErrNotFound).send({ message: 'Запрос не обрабатывается' });
 });
 
