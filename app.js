@@ -1,8 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
+
 const NotFoundError = require('./errors/NotFoundError');
 const {
   createUser,
@@ -22,10 +22,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(cookieParser());
-
 app.post('/signin', loginValidation, login);
-app.post('/sighup', userValidation, createUser);
+app.post('/signup', userValidation, createUser);
 
 app.use('/', auth, require('./routes/users'));
 app.use('/', auth, require('./routes/cards'));

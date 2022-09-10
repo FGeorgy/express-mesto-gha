@@ -111,15 +111,20 @@ module.exports.login = (req, res, next) => {
   }
 
   User.findOne({ email }).select('+password')
+    .orFail(() => new AuthError('Неправильные почта или пароль 1'))
     .then((user) => {
-      if (!user) {
-        throw new AuthError('Неправильные почта или пароль');
-      }
-      return bcrypt.compare(password, user.password);
+      bcrypt.compare(password, user.password)
+        .then((isUserValid) => {
+          if (isUserValid) {
+            res.send({ data: user });
+          } else {
+            throw new AuthError('Неправильные почта или пароль 2');
+          }
+        });
     })
     .then((matched) => {
       if (!matched) {
-        throw new AuthError('Неправильные почта или пароль');
+        throw new AuthError('Неправильные почта или пароль 3');
       }
       return res.send();
     })
