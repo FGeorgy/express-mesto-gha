@@ -1,10 +1,11 @@
-// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const AuthError = require('../errors/AuthError');
+const EmailDublicateError = require('../errors/EmailDublicateError');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -52,7 +53,9 @@ module.exports.createUser = (req, res, next) => {
       })
         .then((user) => res.send({ data: user }))
         .catch((err) => {
-          if (err.name === 'ValidationError') {
+          if (err.code === 11000) {
+            throw new EmailDublicateError('Email уже используется');
+          } else if (err.name === 'ValidationError') {
             throw new BadRequestError('Переданы некорректные данные');
           } else {
             next(err);
@@ -106,37 +109,28 @@ module.exports.updateAvatar = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    throw new BadRequestError('Все поля должны быть заполнены корректно');
-  }
-
   User.findOne({ email }).select('+password')
     .orFail(() => new AuthError('Неправильные почта или пароль 1'))
     .then((user) => {
       bcrypt.compare(password, user.password)
         .then((isUserValid) => {
           if (isUserValid) {
-            res.send({ data: user });
+            const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
+            res.cookie('jwt', token, {
+              maxAge: 3600000 * 24 * 7,
+              httpOnly: true,
+            }).send({ data: user });
           } else {
             throw new AuthError('Неправильные почта или пароль 2');
           }
         });
-    })
-    .then((matched) => {
-      if (!matched) {
-        throw new AuthError('Неправильные почта или пароль 3');
-      }
-      return res.send();
     })
     .catch((err) => next(err));
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail()
-    .catch(() => {
-      throw new NotFoundError('Пользователь не найден');
-    })
+    .orFail(() => new NotFoundError('Пользователь не найден'))
     .then((currentUser) => res.send({ currentUser }))
     .catch((err) => next(err));
 };

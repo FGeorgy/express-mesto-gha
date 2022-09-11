@@ -34,7 +34,8 @@ module.exports.deleteCard = (req, res, next) => {
         throw new AccesDeniedError('Что бы удалить карточку, нужно быть автором');
       } else {
         Card.deleteOne({ cardId })
-          .then(() => res.send({ message: 'Карточка удалена' }));
+          .then(() => res.send({ message: 'Карточка удалена' }))
+          .catch((err) => next(err));
       }
     })
     .catch((err) => {

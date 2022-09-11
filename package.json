@@ -1,7 +1,7 @@
 {
   "name": "express-mesto-gha",
   "version": "1.0.0",
-  "description": "",
+  "description": "Проект Mesto",
   "main": "app.js",
   "dependencies": {
     "bcrypt": "^5.0.1",

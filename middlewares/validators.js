@@ -46,6 +46,7 @@ const avatarValidation = celebrate({
 });
 
 module.exports = {
+  linkRegExp,
   idValidation,
   loginValidation,
   userValidation,
